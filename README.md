@@ -15,6 +15,13 @@ yang bisa ditempel di README profil.
 
 Tahap dihitung dari streak terakhir, jadi pohon yang ditinggal tetap pohon, cuma layu.
 
+### Hari libur
+
+Pakai `?off=sat,sun` (kode: `mon,tue,wed,thu,fri,sat,sun`) untuk menandai hari libur. Hari libur yang
+kosong tidak memutus streak dan tidak dihitung sebagai bolos; kalau tetap commit di hari itu, streak
+tetap bertambah. Contoh: streak 40 di Jumat, Sabtu–Minggu kosong, Senin commit lagi, hasilnya streak 41.
+Minimal satu hari harus tetap aktif.
+
 ## Struktur
 
 ```
@@ -41,6 +48,7 @@ Token cukup classic PAT tanpa scope (hanya membaca data publik).
 - `/api/plant/<username>` kartu tanaman
 - `?theme=dark` tema gelap
 - `?tz=Asia/Jakarta` zona waktu untuk "hari ini" dan deteksi jam 3 pagi
+- `?off=sat,sun` hari libur yang tidak memutus streak
 - `/api/plant/demo?streak=20&idle=0&weekend=1&late=1` mode demo tanpa token
 
 ## Tempel di README profil

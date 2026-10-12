@@ -1,5 +1,5 @@
 import { GitHubError, getPlantState } from "@/lib/github";
-import type { PlantState } from "@/lib/plant";
+import { parseOffDays, type PlantState } from "@/lib/plant";
 import { renderErrorSvg, renderPlantSvg, type Theme } from "@/lib/svg";
 
 const USERNAME = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/;
@@ -52,7 +52,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ username
   }
 
   try {
-    const state = await getPlantState(username, validTz(search.get("tz")));
+    const state = await getPlantState(username, validTz(search.get("tz")), parseOffDays(search.get("off")));
     return svgResponse(renderPlantSvg(username, state, theme), 3600);
   } catch (err) {
     const status = err instanceof GitHubError ? err.status : 500;

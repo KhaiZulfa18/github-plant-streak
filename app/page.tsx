@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { formatOffDays } from "@/lib/plant";
 
 const STAGES = [
   { days: "0–2 hari", name: "Biji", streak: 1 },
@@ -10,10 +11,22 @@ const STAGES = [
   { days: "30+ hari", name: "Pohon", streak: 40 },
 ];
 
+// Urutan tampil Senin–Minggu; nilai sesuai getUTCDay() (0 = Minggu).
+const DAYS = [
+  { label: "Sen", value: 1 },
+  { label: "Sel", value: 2 },
+  { label: "Rab", value: 3 },
+  { label: "Kam", value: 4 },
+  { label: "Jum", value: 5 },
+  { label: "Sab", value: 6 },
+  { label: "Min", value: 0 },
+];
+
 export default function Home() {
   const [input, setInput] = useState("");
   const [username, setUsername] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [off, setOff] = useState<number[]>([]);
   const [origin, setOrigin] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -24,7 +37,20 @@ export default function Home() {
     return () => clearTimeout(t);
   }, [input]);
 
-  const query = theme === "dark" ? "?theme=dark" : "";
+  const query = useMemo(() => {
+    const params = new URLSearchParams();
+    if (theme === "dark") params.set("theme", "dark");
+    if (off.length) params.set("off", formatOffDays(off));
+    const qs = params.toString().replace(/%2C/g, ",");
+    return qs ? `?${qs}` : "";
+  }, [theme, off]);
+
+  function toggleOff(day: number) {
+    setOff((prev) => {
+      const next = prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day];
+      return next.length >= 7 ? prev : next.sort();
+    });
+  }
   const imgPath = username ? `/api/plant/${encodeURIComponent(username)}${query}` : `/api/plant/demo?streak=20&weekend=1${theme === "dark" ? "&theme=dark" : ""}`;
   const snippet = useMemo(
     () => `![Tanaman GitHub saya](${origin}/api/plant/${username || "username-kamu"}${query})`,
@@ -76,6 +102,23 @@ export default function Home() {
                 }`}
               >
                 {t === "light" ? "Terang" : "Gelap"}
+              </button>
+            ))}
+          </div>
+
+          <p className="mt-6 text-sm font-semibold">Hari libur</p>
+          <p className="text-sm text-moss-soft">Hari yang dipilih tidak memutus streak kalau kamu tidak commit.</p>
+          <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Hari libur">
+            {DAYS.map((d) => (
+              <button
+                key={d.value}
+                onClick={() => toggleOff(d.value)}
+                aria-pressed={off.includes(d.value)}
+                className={`rounded-full border-2 border-moss px-3 py-1 text-sm font-semibold ${
+                  off.includes(d.value) ? "bg-moss text-sage" : "bg-transparent"
+                }`}
+              >
+                {d.label}
               </button>
             ))}
           </div>
