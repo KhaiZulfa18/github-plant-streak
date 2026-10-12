@@ -1,5 +1,5 @@
 import { cached } from "./cache";
-import { computeState, type ContributionDay, type PlantState } from "./plant";
+import { computeState, formatOffDays, type ContributionDay, type PlantState } from "./plant";
 
 const TTL = 60 * 60 * 1000; // 1 jam
 
@@ -68,9 +68,9 @@ async function fetchLateNight(login: string, tz: string): Promise<boolean> {
   });
 }
 
-export async function getPlantState(login: string, tz: string): Promise<PlantState> {
-  return cached(`${login.toLowerCase()}:${tz}`, TTL, async () => {
+export async function getPlantState(login: string, tz: string, off: number[] = []): Promise<PlantState> {
+  return cached(`${login.toLowerCase()}:${tz}:${formatOffDays(off)}`, TTL, async () => {
     const [days, lateNight] = await Promise.all([fetchCalendar(login), fetchLateNight(login, tz)]);
-    return { ...computeState(days, tz), lateNight };
+    return { ...computeState(days, tz, off), lateNight };
   });
 }
